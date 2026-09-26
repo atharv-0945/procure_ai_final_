@@ -3,15 +3,15 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/) [![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/) [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/) [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/) [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/) [![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev/) [![Groq](https://img.shields.io/badge/Groq-AI_Assistant-F55036)](https://groq.com/) [![Tesseract.js](https://img.shields.io/badge/Tesseract.js-OCR-5A29E4)](https://github.com/naptha/tesseract.js) [![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/) [![React Flow](https://img.shields.io/badge/React_Flow-Graph-FF0072)](https://reactflow.dev/)
 
 > **"From scattered bidder documents to structured, evidence-backed procurement intelligence."**
-
 ---
-
 ## 🖥️ Project
 
-![ProcureAI Dashboard](docs/project-image.png)
+![Image Description]([docs/project-image.png](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/1st_img.png))
+![2nd_img]([docs/project-image.png](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/2nd_img.png))
+![3rd_img]([docs/project-image.png](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/3rd_img.png))
+![4th_img]([docs/project-image.png](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/4th_img.png))
 
 **ProcureAI** is an AI-powered procurement platform designed to help procurement officers analyze bidder documents, verify tender compliance, identify inconsistencies and potential relationships, and compare multiple bidders using structured procurement intelligence.
-
 ---
 
 ## 🎯 Problem Statement
@@ -25,9 +25,7 @@ Manual verification is time-consuming and makes it difficult to:
 - Track bidder information across tenders
 - Identify potential relationships between bidders
 - Compare multiple bidders systematically
-
 ---
-
 ## 💡 Solution
 
 ProcureAI combines **OCR, AI document understanding, deterministic validation, compliance analysis, risk analysis, bidder intelligence, and relationship visualization** into one workflow.
@@ -56,15 +54,11 @@ Multi-Bidder Comparison
 Officer Review
 ## 🏗️ System Architecture
 
-<!-- Add your system architecture image here -->
+![system_archi]([docs/project-image.png)](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/system_archi.png)
 
-![ProcureAI System Architecture](docs/system-architecture.png)
-
----
 
 ## 🛠️ Technology Stack
-
-
+![tech_stack]([docs/project-image.png](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/tech_stack.png))
 ---
 
 ## 📁 Project Structure
