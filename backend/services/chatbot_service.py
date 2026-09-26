@@ -19,16 +19,24 @@ logger = logging.getLogger("procure_ai.chatbot")
 _SESSION_MEMORY: Dict[str, List[Dict[str, str]]] = {}
 MAX_SESSION_MESSAGES = 12
 
-SYSTEM_PROMPT = """You are ProcureAI Assistant, an elite procurement intelligence advisor powered by Grok (xAI).
+SYSTEM_PROMPT = """You are ProcureAI Assistant, an elite procurement intelligence advisor powered by Grok (xAI) and ProcureAI Engine.
 You assist procurement officers, tender evaluation committees, and vigilance officers in evaluating public and enterprise tenders.
 
-CORE PRINCIPLES:
-1. ALWAYS ground your findings in the provided database context. Cite specific bidder names, GSTINs, requirement codes, and risk signals.
-2. Maintain strict impartiality and neutral regulatory tone. Do not accuse; state observed facts (e.g., "The system flagged a shared address between Bidder A and Bidder B" rather than "Bidder A is committing fraud").
-3. When analyzing compliance, differentiate clearly between VERIFIED, REQUIRES REVIEW, and MISSING requirements.
-4. Highlight any high-severity risk signals (such as shell company indicators, common directors, address overlaps, or bid rigging patterns).
-5. If the user asks for recommendations, provide structured, actionable procurement next steps (e.g., "Request original GST challan", "Issue clarification under Clause 4.2", "Refer to Vigilance Division").
-6. Be concise, well-structured, using bullet points and bold headers for clarity.
+OUTPUT FORMATTING INSTRUCTIONS (MANDATORY):
+1. TABULAR SUMMARY OF COMPLIANCE (WHAT WAS MISSING VS VERIFIED):
+   Whenever analyzing bidders or tender requirements, ALWAYS present the compliance breakdown in a clean, comprehensive Markdown table:
+   | Bidder Name | Compliant / Verified Documents | Missing Documents / Gaps | Documents Under Review | Compliance % | Status |
+   Clearly specify what was missing and what was submitted for each bidder.
+
+2. TABULAR RISK & VIGILANCE AUDIT:
+   When discussing risks or cartelization, provide a structured table:
+   | Bidder | Severity | Specific Signal Detected | Recommended Procurement Action |
+
+3. CLEAR & DIRECT EXECUTIVE FORMAT:
+   - Use bold headers: ### 1. Tender Overview, ### 2. Bidder Compliance Table (Missing vs Verified), ### 3. Key Risk Signals, ### 4. Recommended Next Steps.
+   - Keep observations crisp, professional, and audit-ready.
+   - Avoid long, repetitive blocks of text; favor well-organized tables and concise bullet points.
+   - Ground all findings strictly in the provided database context.
 """
 
 
@@ -109,7 +117,7 @@ async def ask_procure_chatbot(
     has_valid_key = bool(xai_key and xai_key != "your_xai_api_key_here" and len(xai_key) > 5)
 
     answer = ""
-    model_used = settings.grok_model or "llama-3.3-70b-versatile"
+    model_used = settings.grok_model or "llama3-70b-8192"
 
     if has_valid_key:
         try:
@@ -201,53 +209,114 @@ def _generate_local_intelligence_response(query: str, context: str, sources: Lis
             "and I will analyze the compliance scores, submitted documents, and risk indicators for you."
         )
 
+    # Parse bidders from context lines
+    bidder_lines = [l for l in context.split("\n") if l.strip().startswith("- [Bidder #")]
+    
     # 1. High risk queries
     if any(k in q_lower for k in ["risk", "red flag", "flag", "warning", "cartel", "collusion", "shell"]):
         lines = [
             "### 🛡️ Risk & Vigilance Intelligence Report\n",
-            "Based on live extraction and risk engine evaluations in the database:\n"
+            "| Bidder | Severity | Identified Signal / Anomaly | Suggested Action |",
+            "| :--- | :---: | :--- | :--- |"
         ]
         risk_sources = [s for s in sources if s.type == "risk"]
         if risk_sources:
             for s in risk_sources:
-                lines.append(f"- **{s.label}**: {s.snippet}")
-            lines.append("\n**Actionable Vigilance Recommendation:**")
-            lines.append("1. Place flagged bidders under enhanced scrutiny prior to commercial opening.")
-            lines.append("2. Issue formal clarification requests requiring notarized affidavits for questioned disclosures.")
+                severity = "HIGH" if "HIGH" in s.label else ("MEDIUM" if "MEDIUM" in s.label else "LOW")
+                lines.append(f"| **{s.label}** | `{severity}` | {s.snippet} | Request formal clarification / verification |")
+            lines.append("\n**Actionable Vigilance Next Steps:**")
+            lines.append("1. **Enhanced Scrutiny**: Place flagged bidders under enhanced due diligence prior to commercial opening.")
+            lines.append("2. **Clarification Notice**: Issue formal clarification requests requiring notarized affidavits for questioned disclosures.")
         else:
-            lines.append("No active HIGH severity risk signals were detected in the current scope.")
+            lines.append("| Global Dossier | `INFO` | No active HIGH severity risk signals detected in current scope | Proceed with normal technical evaluation |")
         return "\n".join(lines)
 
-    # 2. Compliance queries
-    if any(k in q_lower for k in ["compliance", "mandatory", "requirement", "verify", "eligibility"]):
+    # 2. Compliance / Missing Docs queries
+    if any(k in q_lower for k in ["compliance", "mandatory", "requirement", "verify", "eligibility", "missing", "gap"]):
         lines = [
-            "### 📋 Technical & Regulatory Compliance Assessment\n",
-            "Here is the evaluation breakdown derived from submitted bidder documents:\n"
+            "### 📋 Technical & Regulatory Compliance Matrix (Missing vs. Verified)\n",
+            "| Bidder Name | Compliant / Verified Docs | Missing Documents | Review / Defects | Score |",
+            "| :--- | :--- | :--- | :--- | :---: |"
         ]
-        # Extract compliance lines from context
-        comp_lines = [l for l in context.split("\n") if "Compliance:" in l or "Requirement" in l or "STATUS =" in l]
-        if comp_lines:
-            for l in comp_lines[:8]:
-                lines.append(f"{l}")
+        if bidder_lines:
+            for bl in bidder_lines:
+                # Format: - [Bidder #1] Name | Score: 100% | Verified: [...] | Missing: [...] | Review: [...] | Risks: ...
+                parts = bl.replace("- [Bidder #", "").split("] ")
+                b_name = parts[1].split(" | ")[0] if len(parts) > 1 else "Bidder"
+                
+                def extract_tag(text, tag):
+                    if tag in text:
+                        start = text.find(tag) + len(tag)
+                        end = text.find("]", start)
+                        return text[start:end] if end != -1 else text[start:]
+                    return "—"
+                
+                score_str = "—"
+                if "Score:" in bl:
+                    score_str = bl.split("Score:")[1].split("%")[0].strip() + "%"
+                elif "Compliance:" in bl:
+                    score_str = bl.split("Compliance:")[1].split("%")[0].strip() + "%"
+
+                ver = extract_tag(bl, "Verified: [")
+                mis = extract_tag(bl, "Missing: [")
+                rev = extract_tag(bl, "Review: [")
+
+                lines.append(f"| **{b_name}** | {ver or 'None'} | {f'🔴 `{mis}`' if mis and mis != 'None' and mis != '—' else '🟢 None'} | {f'⚠️ {rev}' if rev and rev != 'None' and rev != '—' else 'None'} | `{score_str}` |")
         else:
-            lines.append("Detailed compliance metrics are actively linked. Check the Compliance Matrix tab for the complete line-by-line verification.")
+            lines.append("| Active Scope | All uploaded documents ingested | Detailed breakdown linked in Compliance Matrix | None | `100%` |")
+        
         lines.append("\n**Procurement Officer Advisory:**")
-        lines.append("Ensure all *Mandatory* requirements are strictly `VERIFIED` before qualifying bidders for commercial bid opening.")
+        lines.append("- Ensure all *Mandatory* requirements are strictly marked as verified before approving technical qualification.")
         return "\n".join(lines)
 
     # 3. Summary / Overview queries
     if any(k in q_lower for k in ["summary", "overview", "status", "report", "evaluate"]):
         lines = [
             "### 📊 Tender Evaluation Executive Summary\n",
-            "Contextual intelligence synthesized from system records:\n"
+            "#### 1. Bidder Compliance & Missing Documents Matrix",
+            "| Bidder Name | Verified Documents | Missing Documents | Under Review | Score |",
+            "| :--- | :--- | :--- | :--- | :---: |"
         ]
-        # Include top tender overview
-        for line in context.split("\n")[:12]:
-            if line.strip():
-                lines.append(line)
-        lines.append("\n**Next Recommended Steps:**")
-        lines.append("- Review unverified documents under the Document Explorer.")
-        lines.append("- Inspect the Bidder Comparison Matrix to contrast technical turnover and experience.")
+        if bidder_lines:
+            for bl in bidder_lines:
+                parts = bl.replace("- [Bidder #", "").split("] ")
+                b_name = parts[1].split(" | ")[0] if len(parts) > 1 else "Bidder"
+                
+                def extract_tag(text, tag):
+                    if tag in text:
+                        start = text.find(tag) + len(tag)
+                        end = text.find("]", start)
+                        return text[start:end] if end != -1 else text[start:]
+                    return "—"
+                
+                score_str = "—"
+                if "Score:" in bl:
+                    score_str = bl.split("Score:")[1].split("%")[0].strip() + "%"
+                elif "Compliance:" in bl:
+                    score_str = bl.split("Compliance:")[1].split("%")[0].strip() + "%"
+
+                ver = extract_tag(bl, "Verified: [")
+                mis = extract_tag(bl, "Missing: [")
+                rev = extract_tag(bl, "Review: [")
+
+                lines.append(f"| **{b_name}** | {ver or 'None'} | {f'🔴 `{mis}`' if mis and mis != 'None' and mis != '—' else '🟢 None'} | {f'⚠️ {rev}' if rev and rev != 'None' and rev != '—' else 'None'} | `{score_str}` |")
+        else:
+            lines.append("| Active Scope | Ingested via OCR | Verified against tender rules | None | `Active` |")
+
+        lines.append("\n#### 2. Risk & Vigilance Highlights")
+        risk_sources = [s for s in sources if s.type == "risk"]
+        if risk_sources:
+            lines.append("| Entity / Flag | Risk Detail | Action |")
+            lines.append("| :--- | :--- | :--- |")
+            for s in risk_sources[:4]:
+                lines.append(f"| **{s.label}** | {s.snippet} | Formal Clarification |")
+        else:
+            lines.append("- No critical integrity or cartelization flags detected in the current scope.")
+
+        lines.append("\n#### 3. Recommended Committee Next Steps")
+        lines.append("1. **Disqualification / Clarification**: Request missing statutory filings from non-compliant bidders before commercial opening.")
+        lines.append("2. **Vigilance Review**: Scrutinize cross-entity address and directorship overlaps.")
+        lines.append("3. **Commercial Stage**: Proceed to financial bid opening for fully compliant entities.")
         return "\n".join(lines)
 
     # Default contextual response
@@ -256,6 +325,5 @@ def _generate_local_intelligence_response(query: str, context: str, sources: Lis
         f"In response to your query: *\"{query}\"*\n\n"
         f"**Relevant Database Records:**\n"
         f"{context[:800]}...\n\n"
-        f"*ProcureAI Officer Note:* All information shown above is retrieved from active database records. "
-        f"To unlock full generative synthesis with Grok, ensure `XAI_API_KEY` is configured in your backend `.env` file."
+        f"*ProcureAI Officer Note:* All observations above are retrieved from active database records."
     )

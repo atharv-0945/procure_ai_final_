@@ -51,13 +51,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const activeTender = tenders.find((t) => String(t.id) === String(activeTenderId));
 
   return (
-    <div className="flex min-h-screen bg-slate-900 text-slate-100">
+    <div className="flex h-screen bg-[#0b0f19] text-slate-100 overflow-hidden">
       <Sidebar
         currentTenderId={activeTenderId}
         onOpenChat={() => openChat()}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header
           tenders={tenders}
           selectedTenderId={activeTenderId}
@@ -65,12 +65,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           onOpenChat={() => openChat()}
         />
 
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto p-6">
           {loading ? (
-            <div className="flex items-center justify-center h-64 text-slate-400">
+            <div className="flex items-center justify-center h-full text-slate-400">
               <div className="flex items-center space-x-3">
                 <span className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></span>
-                <span>Initializing ProcureAI Enterprise Workspace...</span>
+                <span className="text-sm font-mono">Initializing ProcureAI Enterprise Workspace...</span>
               </div>
             </div>
           ) : (

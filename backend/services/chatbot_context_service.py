@@ -79,15 +79,32 @@ def gather_procurement_context(
         for r in reqs:
             t_text.append(f"- [REQ-{r.id}] {r.name} (Mandatory: {r.mandatory}, Type: {r.expected_document_type})")
 
-        t_text.append(f"\nParticipating Bidders ({len(tender_bidders)} total):")
+        t_text.append(f"\nParticipating Bidders & Compliance Breakdown ({len(tender_bidders)} total):")
         for b in tender_bidders:
             summary = get_compliance_summary(b.id, db)
             signals = db.query(RiskSignal).filter(RiskSignal.bidder_id == b.id).all()
             high_risks = sum(1 for s in signals if s.severity == "HIGH")
             med_risks = sum(1 for s in signals if s.severity == "MEDIUM")
+            
+            b_comp_results = db.query(ComplianceResult).filter(ComplianceResult.bidder_id == b.id).all()
+            verified_list = []
+            missing_list = []
+            review_list = []
+            for cr in b_comp_results:
+                r_obj = db.query(Requirement).filter(Requirement.id == cr.requirement_id).first()
+                r_label = r_obj.name if r_obj else f"Req #{cr.requirement_id}"
+                if cr.status == "VERIFIED":
+                    verified_list.append(r_label)
+                elif cr.status == "MISSING":
+                    missing_list.append(r_label)
+                elif cr.status in ["REVIEW", "NEEDS_REVIEW"]:
+                    review_list.append(f"{r_label} ({cr.reason or 'Needs review'})")
+            
             t_text.append(
-                f"- [Bidder #{b.id}] {b.company_name} | Compliance: {summary.get('compliance_score', 0)}% "
-                f"({summary.get('verified', 0)} verified, {summary.get('missing', 0)} missing, {summary.get('review', 0)} review) "
+                f"- [Bidder #{b.id}] {b.company_name} | Score: {summary.get('compliance_score', 0)}% "
+                f"| Verified: [{', '.join(verified_list) if verified_list else 'None'}] "
+                f"| Missing: [{', '.join(missing_list) if missing_list else 'None'}] "
+                f"| Review: [{', '.join(review_list) if review_list else 'None'}] "
                 f"| Risks: {high_risks} HIGH, {med_risks} MEDIUM"
             )
         sections.append("\n".join(t_text))

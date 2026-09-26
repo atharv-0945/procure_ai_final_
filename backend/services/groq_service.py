@@ -266,7 +266,8 @@ Keep tone professional, analytical, direct, and concise."""
             model_used = "ProcureAI Local Diagnostic Engine (Rule Engine Fallback)"
             defects_desc = ""
             if invalid_fields:
-                defects_desc += f"- 🔴 **Invalid Fields Detected**: {', '.join([f'{f.field_name.upper()} ({f.validation_message or \"Invalid syntax\"})' for f in invalid_fields])}\n"
+                inv_list = [f"{f.field_name.upper()} ({f.validation_message or 'Invalid syntax'})" for f in invalid_fields]
+                defects_desc += f"- 🔴 **Invalid Fields Detected**: {', '.join(inv_list)}\n"
             if missing_mandatory:
                 defects_desc += f"- 🟡 **Missing Statutory Documents ({len(missing_mandatory)})**: {', '.join([m['label'] for m in missing_mandatory])}\n"
             if missing_fields_in_doc:

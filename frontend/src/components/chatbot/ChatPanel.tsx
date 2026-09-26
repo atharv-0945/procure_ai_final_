@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { sendChatMessage, getQuickActions, clearChatSession } from '../../api/client';
 import type { ChatMessage, ChatSource, QuickAction } from '../../types';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ChatPanelProps {
   isOpen: boolean;
@@ -272,13 +274,49 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
             </div>
 
             <div
-              className={`max-w-[92%] rounded px-4 py-3 text-xs leading-relaxed ${
+              className={`max-w-[95%] rounded px-4 py-3 text-xs leading-relaxed ${
                 msg.role === 'user'
                   ? 'bg-[#6366f1] text-white shadow-md'
                   : 'bg-[#111827] text-slate-200 border border-[#1e293b] shadow-md'
               }`}
             >
-              <div className="whitespace-pre-wrap">{msg.content}</div>
+              {msg.role === 'user' ? (
+                <div className="whitespace-pre-wrap">{msg.content}</div>
+              ) : (
+                <div className="text-xs leading-relaxed space-y-2">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: ({ children }) => <h1 className="text-sm font-bold text-slate-100 mt-2 mb-1 border-b border-[#1e293b] pb-1">{children}</h1>,
+                      h2: ({ children }) => <h2 className="text-xs font-bold text-slate-100 mt-2 mb-1">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-xs font-semibold text-[#c0c1ff] mt-2 mb-1 uppercase tracking-wide">{children}</h3>,
+                      h4: ({ children }) => <h4 className="text-[11px] font-semibold text-slate-300 mt-1.5 mb-0.5">{children}</h4>,
+                      p: ({ children }) => <p className="mb-2 last:mb-0 text-slate-300 leading-relaxed">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc pl-4 space-y-1 mb-2 text-slate-300">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal pl-4 space-y-1 mb-2 text-slate-300">{children}</ol>,
+                      li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                      strong: ({ children }) => <strong className="font-semibold text-slate-100">{children}</strong>,
+                      blockquote: ({ children }) => <blockquote className="border-l-2 border-[#6366f1] pl-3 py-1 my-2 bg-[#6366f1]/10 text-slate-300 rounded-r text-[11px] italic">{children}</blockquote>,
+                      table: ({ children }) => (
+                        <div className="my-2.5 overflow-x-auto rounded border border-[#1e293b] bg-[#0b0f19]">
+                          <table className="w-full text-[11px] text-left border-collapse">{children}</table>
+                        </div>
+                      ),
+                      thead: ({ children }) => <thead className="bg-[#1f2937] text-slate-200 border-b border-[#374151] font-semibold">{children}</thead>,
+                      tbody: ({ children }) => <tbody className="divide-y divide-[#1e293b]">{children}</tbody>,
+                      tr: ({ children }) => <tr className="hover:bg-[#111827]/80 transition-colors">{children}</tr>,
+                      th: ({ children }) => <th className="px-2.5 py-1.5 font-semibold text-slate-200 whitespace-nowrap">{children}</th>,
+                      td: ({ children }) => <td className="px-2.5 py-1.5 text-slate-300 align-top">{children}</td>,
+                      code: ({ children }) => (
+                        <code className="bg-[#1e293b] text-[#c0c1ff] px-1 py-0.5 rounded text-[10px] font-mono">{children}</code>
+                      ),
+                      hr: () => <hr className="border-[#1e293b] my-2.5" />
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
+              )}
 
               {/* Source Citations */}
               {msg.sources && msg.sources.length > 0 && (

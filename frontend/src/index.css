@@ -6,7 +6,11 @@
     --font-display: 'Hanken Grotesk', 'Outfit', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
-  
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     font-family: var(--font-sans);
     background-color: #0b0f19;
@@ -16,66 +20,111 @@
   }
 }
 
-/* Enterprise Custom Scrollbar */
+/* ─── Scrollbar ─── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: #1e293b;
-  border-radius: 4px;
+  border-radius: 10px;
+  transition: background 250ms ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #6366f1;
 }
 
-/* Focus styles */
+/* ─── Smooth scroll on all containers ─── */
+* {
+  scroll-behavior: smooth;
+}
+
+/* ─── Focus styles ─── */
 *:focus-visible {
   outline: 2px solid #6366f1;
   outline-offset: 2px;
 }
 
-/* React Flow Node & Edge Cursor / Interactivity Enhancements */
+/* ─── Page-level fade-in-up animation ─── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+main > * {
+  animation: fadeInUp 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Stagger first 6 direct children of main containers */
+main > div > *:nth-child(1) { animation-delay: 0ms; }
+main > div > *:nth-child(2) { animation-delay: 50ms; }
+main > div > *:nth-child(3) { animation-delay: 100ms; }
+main > div > *:nth-child(4) { animation-delay: 150ms; }
+main > div > *:nth-child(5) { animation-delay: 200ms; }
+main > div > *:nth-child(6) { animation-delay: 250ms; }
+
+/* ─── Global card hover: lift + subtle indigo glow ─── */
+[class*="bg-[#111827]"][class*="border"][class*="rounded"] {
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 200ms ease,
+              border-color 200ms ease;
+}
+[class*="bg-[#111827]"][class*="border"][class*="rounded"]:not(select):not(textarea):not(input):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px -6px rgba(99, 102, 241, 0.13);
+  border-color: #334155 !important;
+}
+
+/* ─── Button active press micro-animation ─── */
+button:not(:disabled):active {
+  transform: scale(0.96);
+  transition: transform 80ms ease;
+}
+
+/* ─── Table row smooth hover ─── */
+tr {
+  transition: background-color 150ms ease;
+}
+
+/* ─── React Flow Node & Edge ─── */
 .react-flow__node {
   cursor: pointer !important;
   transition: opacity 200ms ease, transform 150ms ease, filter 200ms ease;
 }
-
 .react-flow__node:hover {
   cursor: pointer !important;
 }
-
 .react-flow__edge {
   cursor: pointer !important;
 }
-
 .react-flow__edge-path {
   cursor: pointer !important;
   transition: stroke 200ms ease, stroke-width 200ms ease, opacity 200ms ease;
 }
-
 .react-flow__edge:hover .react-flow__edge-path {
   stroke-width: 2.5px !important;
 }
-
 .react-flow__edge text,
 .react-flow__edge-text,
 .react-flow__edge-label {
   cursor: pointer !important;
   user-select: none;
 }
-
 .react-flow__pane {
   cursor: grab !important;
 }
-
 .react-flow__pane.dragging {
   cursor: grabbing !important;
 }
-
 .react-flow__handle {
   pointer-events: none !important;
 }
@@ -87,4 +136,6 @@
   opacity: 0 !important;
 }
 
-
+/* ─── No-scrollbar utility ─── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
