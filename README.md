@@ -6,7 +6,7 @@
 
 ---
 
-## 🖥️ Project
+## 🖥️ Project preview 
 
 ![1st Image](1st_img.png)
 ![2nd Image](2nd_img.png)
