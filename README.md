@@ -5,11 +5,10 @@
 > **"From scattered bidder documents to structured, evidence-backed procurement intelligence."**
 ---
 ## 🖥️ Project
-
-![Image Description]([docs/project-image.png](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/1st_img.png))
-![2nd_img]([docs/project-image.png](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/2nd_img.png))
-![3rd_img]([docs/project-image.png](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/3rd_img.png))
-![4th_img]([docs/project-image.png](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/4th_img.png))
+![1st Image](1st_img.png)
+![2nd Image](2nd_img.png)
+![3rd Image](3rd_img.png)
+![4th Image](4th_img.png)
 
 **ProcureAI** is an AI-powered procurement platform designed to help procurement officers analyze bidder documents, verify tender compliance, identify inconsistencies and potential relationships, and compare multiple bidders using structured procurement intelligence.
 ---
@@ -52,13 +51,13 @@ Relationship Graph
 Multi-Bidder Comparison
    ↓
 Officer Review
+
 ## 🏗️ System Architecture
 
-![system_archi]([docs/project-image.png)](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/system_archi.png)
-
+![System Architecture](system_archi.png)
 
 ## 🛠️ Technology Stack
-![tech_stack]([docs/project-image.png](https://github.com/atharv-0945/procure_ai_final_/blob/23533d2f63d8897550fb81c910b3afcb90eb7d85/tech_stack.png))
+![Technology Stack](tech_stack.png)
 ---
 
 ## 📁 Project Structure
